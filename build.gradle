@@ -92,9 +92,10 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
-    implementation("committee.nova:skillful:0.0.2.0")
+    implementation("committee.nova:skillful:0.0.2.10")
     implementation("committee.nova:maxhealthfixer:1.1.0")
     implementation fg.deobf("curse.maven:classic-bars-317642:2861996")
+    implementation fg.deobf("curse.maven:torohealth-damage-indicators-245733:2483817")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

@@ -8,7 +8,7 @@ object VanillaModifiers {
   val AGILITY_WALKING_SPEED_BOOST_UUID: UUID = UUID.fromString("153A17B7-02CC-2AAB-780C-D9E787A4F0DA")
 
   def getAgilityWalkingSpeedBoostModifier(lvl: Int): AttributeModifier = new AttributeModifier(AGILITY_WALKING_SPEED_BOOST_UUID, "Agility Walking Speed Boost",
-    lvl * 0.02, 0)
+    lvl * 0.02, 2)
 
   val SWIMMING_SPEED_BOOST_UUID: UUID = UUID.fromString("13E91EAF-421C-7BAD-7241-7B28A361323F")
 
