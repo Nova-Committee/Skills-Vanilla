@@ -2,7 +2,7 @@ package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillful.storage.SkillfulStorage.{SkillRegisterEvent, SkillRelatedFoodRegisterEvent}
-import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods.APPLE
+import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods._
 import committee.nova.skillsvanilla.registries.VanillaSkills._
 import net.minecraft.block.material.Material
 import net.minecraft.entity.player.EntityPlayerMP
@@ -25,14 +25,19 @@ object ForgeEventHandler {
 class ForgeEventHandler {
   @SubscribeEvent
   def onSkillRegister(event: SkillRegisterEvent): Unit = event.addSkills(
-    STRENGTH, CONSTITUTION, WILL, AGILITY,
-    LUCK, TACTICS, BLOCK, ARCHERY, THROWING,
-    MINING, LOGGING, EXCAVATING, SWIMMING
+    STRENGTH, CONSTITUTION, WILL, AGILITY, LUCK,
+    TACTICS, BLOCK, ARCHERY, THROWING, MINING,
+    LOGGING, EXCAVATING, SWIMMING
   )
 
   @SubscribeEvent
   def onFoodRegister(event: SkillRelatedFoodRegisterEvent): Unit = event.addSkillRelatedFoods(
-    APPLE
+    APPLE, MUSHROOM_STEW, BREAD, RAW_PORKCHOP, COOKED_PORKCHOP,
+    GOLDEN_APPLE, RAW_FISH, COOKED_FISH, COOKIE, MELON,
+    RAW_BEEF, COOKED_BEEF, RAW_CHICKEN, COOKED_CHICKEN, ROTTEN_FLESH,
+    SPIDER_EYE, CARROT, GOLDEN_CARROT, POTATO, BAKED_POTATO,
+    POISONOUS_POTATO, PUMPKIN_PIE, RAW_RABBIT, COOKED_RABBIT, RABBIT_STEW,
+    RAW_MUTTON, COOKED_MUTTON, BEETROOT, BEETROOT_SOUP
   )
 
   @SubscribeEvent

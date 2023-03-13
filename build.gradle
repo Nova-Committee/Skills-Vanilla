@@ -92,7 +92,7 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
-    implementation("committee.nova:skillful:0.0.1.6")
+    implementation("committee.nova:skillful:0.0.2.0")
     implementation("committee.nova:maxhealthfixer:1.1.0")
     implementation fg.deobf("curse.maven:classic-bars-317642:2861996")
 }

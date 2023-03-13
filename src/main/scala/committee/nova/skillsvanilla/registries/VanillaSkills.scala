@@ -1,7 +1,8 @@
 package committee.nova.skillsvanilla.registries
 
-import committee.nova.skillful.api.{IApplyAttributeModifiers, IXPChangesAfterSleep}
-import committee.nova.skillful.skills.{AttributeInfluencingSkill, Skill, SkillInstance}
+import committee.nova.skillful.api.skill.{IApplyAttributeModifiers, IXPChangesAfterSleep}
+import committee.nova.skillful.impl.skill.instance.SkillInstance
+import committee.nova.skillful.impl.skill.{AttributeInfluencingSkill, Skill}
 import committee.nova.skillsvanilla.SkillsVanilla
 import committee.nova.skillsvanilla.modifiers.VanillaModifiers
 import net.minecraft.entity.ai.attributes.{AttributeModifier, IAttribute}
