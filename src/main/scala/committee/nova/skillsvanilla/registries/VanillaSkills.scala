@@ -32,6 +32,9 @@ object VanillaSkills {
   final val EXCAVATING = new Skill(new ResourceLocation(SkillsVanilla.MODID, "excavating"), 100, BossInfo.Color.YELLOW, T200)
   final val SWIMMING = new AttributeInfluencingSkill(new ResourceLocation(SkillsVanilla.MODID, "swimming"), 100, BossInfo.Color.YELLOW, T200,
     EntityLivingBase.SWIM_SPEED, (_, s) => VanillaModifiers.getSwimmingSpeedBoostModifier(s.getCurrentLevel))
+  final val ANATOMY = new Skill(new ResourceLocation(SkillsVanilla.MODID, "anatomy"), 100, BossInfo.Color.PURPLE, T200)
+  final val ENCHANTING = new Skill(new ResourceLocation(SkillsVanilla.MODID, "enchanting"), 100, BossInfo.Color.PURPLE, T200)
+  final val STEALTH = new Skill(new ResourceLocation(SkillsVanilla.MODID, "stealth"), 100, BossInfo.Color.PURPLE, T200)
 
   class Constitution extends Skill(new ResourceLocation(SkillsVanilla.MODID, "constitution"), 100, BossInfo.Color.GREEN, T200)
     with IXPChangesAfterSleep with IApplyAttributeModifiers {

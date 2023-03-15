@@ -1,6 +1,7 @@
 package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
+import committee.nova.skillsvanilla.implicits.Implicits.PlayerImplicit
 import committee.nova.skillsvanilla.registries.VanillaSkills
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraftforge.fml.common.FMLCommonHandler
@@ -14,19 +15,12 @@ object FMLEventHandler {
 class FMLEventHandler {
   @SubscribeEvent
   def onPlayerTick(event: PlayerTickEvent): Unit = {
-    if (!event.player.isInstanceOf[EntityPlayerMP]) return
-    val p = event.player.asInstanceOf[EntityPlayerMP]
+    val player = event.player
+    if (!player.isInstanceOf[EntityPlayerMP]) return
+    val p = player.asInstanceOf[EntityPlayerMP]
     if (event.phase == Phase.START) return
     // Will related exhaustion
     p.addExhaustion(-0.001F * p.getSkillStat(VanillaSkills.WILL).getCurrentLevel max -p.getFoodStats.foodExhaustionLevel)
+    if (p.isUsingStealth) p.getSkillStat(VanillaSkills.STEALTH).addXp(p, 1)
   }
-
-  //@SubscribeEvent
-  //def onLogin(event: PlayerLoggedInEvent): Unit = {
-  //  event.player match {
-  //    case e: EntityPlayerMP => {
-  //      e.getSkillStat(VanillaSkills.CONSTITUTION).cheat(e)
-  //    }
-  //  }
-  //}
 }

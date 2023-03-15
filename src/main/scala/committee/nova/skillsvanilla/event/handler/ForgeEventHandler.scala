@@ -7,14 +7,19 @@ import committee.nova.skillsvanilla.registries.VanillaSkills._
 import net.minecraft.block.material.Material
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.init.SoundEvents
+import net.minecraft.inventory.ContainerEnchantment
 import net.minecraft.item.{ItemAxe, ItemPickaxe}
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.event.entity.living.{LivingDeathEvent, LivingHealEvent, LivingHurtEvent}
-import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed
+import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent
+import net.minecraftforge.event.entity.living.{LivingDeathEvent, LivingHealEvent, LivingHurtEvent, LootingLevelEvent}
+import net.minecraftforge.event.entity.player.PlayerEvent.{BreakSpeed, Visibility}
+import net.minecraftforge.event.entity.player.PlayerPickupXpEvent
 import net.minecraftforge.event.world.BlockEvent.BreakEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
+import scala.collection.JavaConverters.collectionAsScalaIterableConverter
 import scala.util.Random
 
 
@@ -27,7 +32,8 @@ class ForgeEventHandler {
   def onSkillRegister(event: SkillRegisterEvent): Unit = event.addSkills(
     STRENGTH, CONSTITUTION, WILL, AGILITY, LUCK,
     TACTICS, BLOCK, ARCHERY, THROWING, MINING,
-    LOGGING, EXCAVATING, SWIMMING
+    LOGGING, EXCAVATING, SWIMMING, ANATOMY, ENCHANTING,
+    STEALTH
   )
 
   @SubscribeEvent
@@ -141,7 +147,10 @@ class ForgeEventHandler {
           attacker.getSkillStat(ARCHERY).addXp(attacker, 5 + (victim.getMaxHealth / 20).toInt)
         case _ =>
       }
-    } else attacker.getSkillStat(TACTICS).addXp(attacker, 5 + (victim.getMaxHealth / 20).toInt)
+    } else {
+      attacker.getSkillStat(ANATOMY).addXp(attacker, rand.nextInt(2 + (victim.width * victim.height).toInt))
+      attacker.getSkillStat(TACTICS).addXp(attacker, 5 + (victim.getMaxHealth / 20).toInt)
+    }
   }
 
   @SubscribeEvent
@@ -178,6 +187,37 @@ class ForgeEventHandler {
         }
       case _ =>
     }
-
   }
+
+  @SubscribeEvent
+  def onLooting(event: LootingLevelEvent): Unit = event.getDamageSource.getTrueSource match {
+    case p: EntityPlayerMP => event.setLootingLevel(event.getLootingLevel + new Random().nextInt(p.getSkillStat(ANATOMY).getCurrentLevel / 10))
+    case _ =>
+  }
+
+  @SubscribeEvent
+  def onEnchantLevel(event: EnchantmentLevelSetEvent): Unit = {
+    val player = event.getWorld.getEntitiesWithinAABB(classOf[EntityPlayerMP], new AxisAlignedBB(event.getPos.getX - 4.0, event.getPos.getY - 4.0, event.getPos.getZ - 4.0,
+      event.getPos.getX + 4.0, event.getPos.getY + 4.0, event.getPos.getZ + 4.0))
+    if (player.isEmpty) return
+    var l: Int = 0
+    player.asScala.foreach(p => p.openContainer match {
+      case _: ContainerEnchantment => l += p.getSkillStat(ENCHANTING).getCurrentLevel / 5
+      case _ =>
+    }
+    )
+    event.setLevel(event.getLevel + l)
+  }
+
+  @SubscribeEvent
+  def onPlayerGainXP(event: PlayerPickupXpEvent): Unit = {
+    //Temporary
+    event.getEntityPlayer match {
+      case p: EntityPlayerMP => p.getSkillStat(ENCHANTING).addXp(p, event.getOrb.getXpValue)
+      case _ =>
+    }
+  }
+
+  @SubscribeEvent
+  def onVisibility(event: Visibility): Unit = event.modifyVisibility(1.0 - (event.getEntityPlayer.getSkillStat(STEALTH).getCurrentLevel / 100.0))
 }
