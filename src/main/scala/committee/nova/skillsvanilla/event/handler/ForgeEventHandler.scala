@@ -5,14 +5,18 @@ import committee.nova.skillful.storage.SkillfulStorage.{SkillRegisterEvent, Skil
 import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods._
 import committee.nova.skillsvanilla.registries.VanillaSkills._
 import net.minecraft.block.material.Material
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.init.SoundEvents
+import net.minecraft.entity.item.EntityItem
+import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
+import net.minecraft.entity.projectile.EntityArrow
+import net.minecraft.entity.projectile.EntityArrow.PickupStatus
+import net.minecraft.init.{Items, SoundEvents}
 import net.minecraft.inventory.ContainerEnchantment
-import net.minecraft.item.{ItemAxe, ItemPickaxe}
+import net.minecraft.item.{ItemAxe, ItemPickaxe, ItemStack}
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent
+import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.event.entity.living.{LivingDeathEvent, LivingHealEvent, LivingHurtEvent, LootingLevelEvent}
 import net.minecraftforge.event.entity.player.PlayerEvent.{BreakSpeed, Visibility}
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent
@@ -53,6 +57,7 @@ class ForgeEventHandler {
     var isHurtByEntity = false
     var fire = 0
     val dmg = event.getSource
+    val world = event.getEntityLiving.world
     dmg match {
       case e: EntityDamageSource =>
         e.getTrueSource match {
@@ -71,6 +76,7 @@ class ForgeEventHandler {
       }
     }
     var antiDodge: Float = event.getAmount
+    val victim = event.getEntityLiving
     if (attacker != null) {
       if (indirectDmg != null) {
         indirectDmg.damageType match {
@@ -81,6 +87,8 @@ class ForgeEventHandler {
             throwing.addXp(attacker, 1)
           case "arrow" =>
             val archery = attacker.getSkillStat(ARCHERY)
+            if (archery.getCurrentLevel >= 20 && !victim.isInstanceOf[EntityPlayer])
+              world.spawnEntity(new EntityItem(world, victim.posX, victim.posY + 1.0, victim.posZ, new ItemStack(Items.ARROW, 1)))
             antiDodge *= (1F + archery.getCurrentLevel * 0.05F)
             event.setAmount(event.getAmount * (1.0F + archery.getCurrentLevel * 0.02F))
             archery.addXp(attacker, 1)
@@ -96,7 +104,7 @@ class ForgeEventHandler {
       event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
       strength.addXp(attacker, 2)
     }
-    event.getEntityLiving match {
+    victim match {
       case p: EntityPlayerMP =>
         val strength = p.getSkillStat(STRENGTH)
         val agility = p.getSkillStat(AGILITY)
@@ -154,6 +162,17 @@ class ForgeEventHandler {
   }
 
   @SubscribeEvent
+  def onEntityJoinWorld(event: EntityJoinWorldEvent): Unit = {
+    event.getEntity match {
+      case a: EntityArrow => a.shootingEntity match {
+        case p: EntityPlayerMP => if (p.getSkillStat(ARCHERY).getCurrentLevel > 20) a.pickupStatus = PickupStatus.ALLOWED
+        case _ =>
+      }
+      case _ =>
+    }
+  }
+
+  @SubscribeEvent
   def onHeal(event: LivingHealEvent): Unit = {
     event.getEntityLiving match {
       case p: EntityPlayerMP =>
@@ -204,8 +223,7 @@ class ForgeEventHandler {
     player.asScala.foreach(p => p.openContainer match {
       case _: ContainerEnchantment => l += p.getSkillStat(ENCHANTING).getCurrentLevel / 5
       case _ =>
-    }
-    )
+    })
     event.setLevel(event.getLevel + l)
   }
 
