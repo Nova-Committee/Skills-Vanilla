@@ -21,7 +21,6 @@ class FMLEventHandler {
     if (event.phase == Phase.START) return
     // Will related exhaustion
     p.addExhaustion(-0.001F * p.getSkillStat(VanillaSkills.WILL).getCurrentLevel max -p.getFoodStats.foodExhaustionLevel)
-    val effect = p.getStealthEffect
-    if (effect != 0) p.getSkillStat(VanillaSkills.STEALTH).addXp(p, effect)
+    p.getSkillStat(VanillaSkills.STEALTH).addXp(p, p.getStealthEffect)
   }
 }
