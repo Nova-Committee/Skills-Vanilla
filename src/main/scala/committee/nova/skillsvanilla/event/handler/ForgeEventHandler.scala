@@ -191,7 +191,7 @@ class ForgeEventHandler {
 
   @SubscribeEvent
   def onLooting(event: LootingLevelEvent): Unit = event.getDamageSource.getTrueSource match {
-    case p: EntityPlayerMP => event.setLootingLevel(event.getLootingLevel + new Random().nextInt(p.getSkillStat(ANATOMY).getCurrentLevel / 10))
+    case p: EntityPlayerMP => event.setLootingLevel(event.getLootingLevel + new Random().nextInt(1 + p.getSkillStat(ANATOMY).getCurrentLevel / 10))
     case _ =>
   }
 
