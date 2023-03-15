@@ -27,6 +27,6 @@ class FMLEventHandler {
     p.getSkillStat(VanillaSkills.STEALTH).addXp(p, p.getStealthEffect)
     val air = p.getAir
     val airPercent = air / 300.0
-    if ((p.getSkillStat(SWIMMING).getCurrentLevel / 200.0) * (1.0 - airPercent) > new Random().nextDouble()) p.setAir((air + 1) max 300)
+    if ((p.getSkillStat(SWIMMING).getCurrentLevel / 200.0) * (1.0 - airPercent) > new Random().nextDouble()) p.setAir((air + 1) min 300)
   }
 }
