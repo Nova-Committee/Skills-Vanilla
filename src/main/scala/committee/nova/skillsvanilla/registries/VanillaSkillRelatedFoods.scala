@@ -107,14 +107,15 @@ object VanillaSkillRelatedFoods {
     VanillaSkills.WILL -> rand.nextInt(10),
     VanillaSkills.STRENGTH -> (rand.nextInt(4) - 3),
     VanillaSkills.CONSTITUTION -> (rand.nextInt(4) - 3),
-    VanillaSkills.AGILITY -> rand.nextInt(2)
+    VanillaSkills.PERCEPTION -> rand.nextInt(10)
   ))
   val CARROT = new SkillRelatedFood(Items.CARROT.asInstanceOf[ItemFood], (_, _) => Map(
-    VanillaSkills.CONSTITUTION -> rand.nextInt(2)
+    VanillaSkills.CONSTITUTION -> rand.nextInt(2),
+    VanillaSkills.PERCEPTION -> rand.nextInt(5)
   ))
   val GOLDEN_CARROT = new SkillRelatedFood(Items.GOLDEN_CARROT.asInstanceOf[ItemFood], (_, _) => Map(
     VanillaSkills.CONSTITUTION -> rand.nextInt(3),
-    VanillaSkills.STRENGTH -> rand.nextInt(3),
+    VanillaSkills.PERCEPTION -> rand.nextInt(8),
     VanillaSkills.LUCK -> rand.nextInt(3)
   ))
   val POTATO = new SkillRelatedFood(Items.POTATO.asInstanceOf[ItemFood], (_, _) => Map(

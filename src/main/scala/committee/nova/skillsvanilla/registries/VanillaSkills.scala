@@ -11,8 +11,6 @@ import net.minecraft.entity.{EntityLivingBase, SharedMonsterAttributes}
 import net.minecraft.util.ResourceLocation
 import net.minecraft.world.BossInfo
 
-import scala.util.Random
-
 object VanillaSkills {
   final val T200: Int => Int = i => i * 200
 
@@ -20,6 +18,7 @@ object VanillaSkills {
   final val CONSTITUTION = new Constitution
   final val WILL = new Skill(new ResourceLocation(SkillsVanilla.MODID, "will"), 100, BossInfo.Color.GREEN, T200)
   final val AGILITY = new Agility
+  final val PERCEPTION = new Perception
   final val LUCK = new Luck
   final val TACTICS = new AttributeInfluencingSkill(new ResourceLocation(SkillsVanilla.MODID, "tactics"), 100, BossInfo.Color.YELLOW, T200,
     SharedMonsterAttributes.ATTACK_SPEED, (_, s) => VanillaModifiers.getTacticsAttackSpeedBoostModifier(s.getCurrentLevel))
@@ -39,7 +38,7 @@ object VanillaSkills {
   class Constitution extends Skill(new ResourceLocation(SkillsVanilla.MODID, "constitution"), 100, BossInfo.Color.GREEN, T200)
     with IXPChangesAfterSleep with IApplyAttributeModifiers {
     override def change(player: EntityPlayerMP, instance: SkillInstance): Int = {
-      val rand = new Random()
+      val rand = player.getRNG
       if (rand.nextBoolean) rand.nextInt(10) else 0
     }
 
@@ -55,10 +54,14 @@ object VanillaSkills {
     }
   }
 
+  class Perception extends Skill(new ResourceLocation(SkillsVanilla.MODID, "perception"), 100, BossInfo.Color.GREEN, T200) with IXPChangesAfterSleep {
+    override def change(player: EntityPlayerMP, instance: SkillInstance): Int = player.getRNG.nextInt(3)
+  }
+
   class Luck extends AttributeInfluencingSkill(new ResourceLocation(SkillsVanilla.MODID, "luck"), 100, BossInfo.Color.GREEN, T200,
     SharedMonsterAttributes.LUCK, (_, s) => VanillaModifiers.getLuckAmplifier(s.getCurrentLevel)) with IXPChangesAfterSleep {
     override def change(player: EntityPlayerMP, instance: SkillInstance): Int = {
-      val rand = new Random()
+      val rand = player.getRNG
       if (rand.nextBoolean) rand.nextInt(5) else -rand.nextInt(2)
     }
   }

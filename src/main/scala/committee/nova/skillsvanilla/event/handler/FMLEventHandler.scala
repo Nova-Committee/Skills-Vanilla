@@ -2,14 +2,14 @@ package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillsvanilla.implicits.Implicits.PlayerImplicit
+import committee.nova.skillsvanilla.network.handler.NetworkHandler
+import committee.nova.skillsvanilla.network.message.TargetSyncMessage
 import committee.nova.skillsvanilla.registries.VanillaSkills
-import committee.nova.skillsvanilla.registries.VanillaSkills.SWIMMING
+import committee.nova.skillsvanilla.registries.VanillaSkills.{PERCEPTION, SWIMMING}
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.{Phase, PlayerTickEvent}
-
-import scala.util.Random
 
 object FMLEventHandler {
   def init(): Unit = FMLCommonHandler.instance().bus().register(new FMLEventHandler)
@@ -24,9 +24,22 @@ class FMLEventHandler {
     if (event.phase == Phase.START) return
     // Will related exhaustion
     p.addExhaustion(-0.001F * p.getSkillStat(VanillaSkills.WILL).getCurrentLevel max -p.getFoodStats.foodExhaustionLevel)
+    // Stealth check
     p.getSkillStat(VanillaSkills.STEALTH).addXp(p, p.getStealthEffect)
+    // Swimming related air change
     val air = p.getAir
     val airPercent = air / 300.0
-    if ((p.getSkillStat(SWIMMING).getCurrentLevel / 200.0) * (1.0 - airPercent) > new Random().nextDouble()) p.setAir((air + 1) min 300)
+    if ((p.getSkillStat(SWIMMING).getCurrentLevel / 200.0) * (1.0 - airPercent) > p.getRNG.nextDouble()) p.setAir((air + 1) min 300)
+    // Targeting check
+    val world = p.world
+    if (world.getWorldTime % 5 == 0) {
+      val perception = p.getSkillStat(PERCEPTION).getCurrentLevel
+      if (perception > 10) {
+        val msg = new TargetSyncMessage
+        val size = p.getTargeting(8.0 + (0.16 * (perception - 20)) max .0)
+        msg.setTargeting(if (perception > 15) size else if (size > 0) -1 else 0)
+        NetworkHandler.instance.sendTo(msg, p)
+      }
+    }
   }
 }

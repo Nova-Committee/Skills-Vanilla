@@ -1,6 +1,6 @@
 package committee.nova.skillsvanilla
 
-import committee.nova.skillsvanilla.event.handler.{FMLClientEventHandler, FMLEventHandler, ForgeEventHandler}
+import committee.nova.skillsvanilla.event.handler.{FMLClientEventHandler, FMLEventHandler, ForgeClientEventHandler, ForgeEventHandler}
 import committee.nova.skillsvanilla.network.handler.NetworkHandler
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
@@ -13,8 +13,11 @@ object SkillsVanilla {
 
   @EventHandler def preInit(e: FMLPreInitializationEvent): Unit = {
     FMLEventHandler.init()
-    if (FMLCommonHandler.instance().getSide == Side.CLIENT) FMLClientEventHandler.init()
     ForgeEventHandler.init()
+    if (FMLCommonHandler.instance().getSide == Side.CLIENT) {
+      FMLClientEventHandler.init()
+      ForgeClientEventHandler.init()
+    }
     NetworkHandler.init(e)
   }
 }

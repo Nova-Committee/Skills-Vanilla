@@ -17,11 +17,12 @@ import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
-import net.minecraftforge.event.entity.living.{LivingDeathEvent, LivingHealEvent, LivingHurtEvent, LootingLevelEvent}
+import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent
+import net.minecraftforge.event.entity.living._
 import net.minecraftforge.event.entity.player.PlayerEvent.{BreakSpeed, Visibility}
-import net.minecraftforge.event.entity.player.PlayerPickupXpEvent
+import net.minecraftforge.event.entity.player.{ItemFishedEvent, PlayerPickupXpEvent}
 import net.minecraftforge.event.world.BlockEvent.BreakEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 
 import scala.collection.JavaConverters.collectionAsScalaIterableConverter
 import scala.util.Random
@@ -35,9 +36,9 @@ class ForgeEventHandler {
   @SubscribeEvent
   def onSkillRegister(event: SkillRegisterEvent): Unit = event.addSkills(
     STRENGTH, CONSTITUTION, WILL, AGILITY, LUCK,
-    TACTICS, BLOCK, ARCHERY, THROWING, MINING,
-    LOGGING, EXCAVATING, SWIMMING, ANATOMY, ENCHANTING,
-    STEALTH
+    PERCEPTION, TACTICS, BLOCK, ARCHERY, THROWING,
+    MINING, LOGGING, EXCAVATING, SWIMMING, ANATOMY,
+    ENCHANTING, STEALTH
   )
 
   @SubscribeEvent
@@ -78,6 +79,7 @@ class ForgeEventHandler {
     var antiDodge: Float = event.getAmount
     val victim = event.getEntityLiving
     if (attacker != null) {
+      val strength = attacker.getSkillStat(STRENGTH)
       if (indirectDmg != null) {
         indirectDmg.damageType match {
           case "thrown" =>
@@ -85,6 +87,8 @@ class ForgeEventHandler {
             antiDodge *= (1F + throwing.getCurrentLevel * 0.001F)
             event.setAmount(event.getAmount + throwing.getCurrentLevel * 0.01F)
             throwing.addXp(attacker, 1)
+            event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
+            strength.addXp(attacker, 2)
           case "arrow" =>
             val archery = attacker.getSkillStat(ARCHERY)
             if (archery.getCurrentLevel >= 20 && !victim.isInstanceOf[EntityPlayer])
@@ -92,17 +96,20 @@ class ForgeEventHandler {
             antiDodge *= (1F + archery.getCurrentLevel * 0.05F)
             event.setAmount(event.getAmount * (1.0F + archery.getCurrentLevel * 0.02F))
             archery.addXp(attacker, 1)
+            event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
+            strength.addXp(attacker, 2)
           case _ =>
         }
       } else {
-        val tactics = attacker.getSkillStat(TACTICS)
-        antiDodge *= (1F + tactics.getCurrentLevel * 0.1F)
-        event.setAmount(event.getAmount * (1.0F + tactics.getCurrentLevel * 0.02F))
-        tactics.addXp(attacker, 1)
+        if (!dmg.isMagicDamage) {
+          val tactics = attacker.getSkillStat(TACTICS)
+          antiDodge *= (1F + tactics.getCurrentLevel * 0.1F)
+          event.setAmount(event.getAmount * (1.0F + tactics.getCurrentLevel * 0.02F))
+          tactics.addXp(attacker, 1)
+          event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
+          strength.addXp(attacker, 2)
+        }
       }
-      val strength = attacker.getSkillStat(STRENGTH)
-      event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-      strength.addXp(attacker, 2)
     }
     victim match {
       case p: EntityPlayerMP =>
@@ -162,6 +169,28 @@ class ForgeEventHandler {
   }
 
   @SubscribeEvent
+  def onJump(event: LivingJumpEvent): Unit = {
+    event.getEntityLiving match {
+      case p: EntityPlayer =>
+        val agility = p.getSkillStat(AGILITY)
+        if (agility.isClueless) return
+        p.motionY +=.0042F * agility.getCurrentLevel
+      case _ =>
+    }
+  }
+
+  @SubscribeEvent
+  def onFall(event: LivingFallEvent): Unit = {
+    event.getEntityLiving match {
+      case p: EntityPlayer =>
+        val agility = p.getSkillStat(AGILITY).getCurrentLevel
+        val maxImmune = 3.0F + agility / 20.0F
+        event.setDamageMultiplier(if (event.getDistance < maxImmune) 0.0F else 1.0F - 0.009F * agility)
+      case _ =>
+    }
+  }
+
+  @SubscribeEvent
   def onEntityJoinWorld(event: EntityJoinWorldEvent): Unit = {
     event.getEntity match {
       case a: EntityArrow => a.shootingEntity match {
@@ -210,7 +239,7 @@ class ForgeEventHandler {
 
   @SubscribeEvent
   def onLooting(event: LootingLevelEvent): Unit = event.getDamageSource.getTrueSource match {
-    case p: EntityPlayerMP => event.setLootingLevel(event.getLootingLevel + new Random().nextInt(1 + p.getSkillStat(ANATOMY).getCurrentLevel / 10))
+    case p: EntityPlayerMP => event.setLootingLevel(event.getLootingLevel + p.getRNG.nextInt(1 + p.getSkillStat(ANATOMY).getCurrentLevel / 10))
     case _ =>
   }
 
@@ -238,4 +267,12 @@ class ForgeEventHandler {
 
   @SubscribeEvent
   def onVisibility(event: Visibility): Unit = event.modifyVisibility(1.0 - (event.getEntityPlayer.getSkillStat(STEALTH).getCurrentLevel / 100.0))
+
+  @SubscribeEvent(priority = EventPriority.LOWEST)
+  def onFished(event: ItemFishedEvent): Unit = {
+    event.getEntityPlayer match {
+      case p: EntityPlayerMP => p.getSkillStat(PERCEPTION).addXp(p, 10)
+      case _ =>
+    }
+  }
 }

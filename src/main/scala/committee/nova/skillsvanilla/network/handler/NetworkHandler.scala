@@ -1,7 +1,7 @@
 package committee.nova.skillsvanilla.network.handler
 
 import committee.nova.skillsvanilla.SkillsVanilla
-import committee.nova.skillsvanilla.network.message.SwimmingSyncMessage
+import committee.nova.skillsvanilla.network.message.{SwimmingSyncMessage, TargetSyncMessage}
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.network.NetworkRegistry
 import net.minecraftforge.fml.common.network.simpleimpl.{IMessage, IMessageHandler, SimpleNetworkWrapper}
@@ -12,7 +12,10 @@ object NetworkHandler {
 
   private var nextID: Int = 0
 
-  def init(e: FMLPreInitializationEvent): Unit = registerMessage(classOf[MessageHandler.SwimmingSyncHandler], classOf[SwimmingSyncMessage], Side.SERVER)
+  def init(e: FMLPreInitializationEvent): Unit = {
+    registerMessage(classOf[SwimmingSyncMessage.Handler], classOf[SwimmingSyncMessage], Side.SERVER)
+    registerMessage(classOf[TargetSyncMessage.Handler], classOf[TargetSyncMessage], Side.CLIENT)
+  }
 
   def registerMessage[REQ <: IMessage, REPLY <: IMessage](msgHandler: Class[_ <: IMessageHandler[REQ, REPLY]], requestMsgType: Class[REQ], side: Side): Unit = {
     nextID += 1
