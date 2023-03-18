@@ -11,10 +11,15 @@ object TargetSyncMessage {
   class Handler extends IMessageHandler[TargetSyncMessage, IMessage] {
     override def onMessage(message: TargetSyncMessage, ctx: MessageContext): IMessage = {
       if (ctx.side != Side.CLIENT) return null
-      val player = Minecraft.getMinecraft.player
-      val tag = new NBTTagCompound
-      tag.setInteger("targeting", message.targeting)
-      player.getEntityData.setTag(SkillsVanilla.MODID, tag)
+      val mc = Minecraft.getMinecraft
+      mc.addScheduledTask(new Runnable {
+        override def run(): Unit = {
+          val player = Minecraft.getMinecraft.player
+          val tag = new NBTTagCompound
+          tag.setInteger("targeting", message.targeting)
+          player.getEntityData.setTag(SkillsVanilla.MODID, tag)
+        }
+      })
       null
     }
   }
