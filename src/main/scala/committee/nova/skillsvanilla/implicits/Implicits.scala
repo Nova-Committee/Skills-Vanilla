@@ -1,6 +1,6 @@
 package committee.nova.skillsvanilla.implicits
 
-import net.minecraft.entity.monster.EntityMob
+import net.minecraft.entity.EntityLiving
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.math.AxisAlignedBB
 
@@ -29,6 +29,6 @@ object Implicits {
 
     def getTargeting(r: Double): Int = getMobsWithIn(r).asScala.count(m => player == m.getAttackTarget)
 
-    def getMobsWithIn(r: Double): JList[EntityMob] = player.world.getEntitiesWithinAABB(classOf[EntityMob], new AxisAlignedBB(player.posX - r, player.posY - r, player.posZ - r, player.posX + r, player.posY + r, player.posZ + r))
+    def getMobsWithIn(r: Double): JList[EntityLiving] = player.world.getEntitiesWithinAABB(classOf[EntityLiving], new AxisAlignedBB(player.posX - r, player.posY - r, player.posZ - r, player.posX + r, player.posY + r, player.posZ + r))
   }
 }
