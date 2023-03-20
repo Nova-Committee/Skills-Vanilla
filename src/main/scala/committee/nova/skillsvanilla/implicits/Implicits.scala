@@ -1,5 +1,6 @@
 package committee.nova.skillsvanilla.implicits
 
+import committee.nova.skillsvanilla.util.Utilities
 import net.minecraft.entity.EntityLiving
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.math.AxisAlignedBB
@@ -15,7 +16,7 @@ object Implicits {
       var freeMob = false
       var isSeen = false
       var targeted = false
-      mobs.asScala.foreach(m => {
+      mobs.asScala.filter(l => Utilities.isEnemy(l)).foreach(m => {
         val target = m.getAttackTarget
         val seen = m.canEntityBeSeen(player)
         if (seen) {
