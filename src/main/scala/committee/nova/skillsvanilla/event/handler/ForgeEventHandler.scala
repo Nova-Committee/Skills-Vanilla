@@ -4,6 +4,7 @@ import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillful.storage.SkillfulStorage.{SkillRegisterEvent, SkillRelatedFoodRegisterEvent}
 import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods._
 import committee.nova.skillsvanilla.registries.VanillaSkills._
+import committee.nova.skillsvanilla.util.Utilities
 import net.minecraft.block.material.Material
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
@@ -11,7 +12,7 @@ import net.minecraft.entity.projectile.EntityArrow
 import net.minecraft.entity.projectile.EntityArrow.PickupStatus
 import net.minecraft.init.{Items, SoundEvents}
 import net.minecraft.inventory.ContainerEnchantment
-import net.minecraft.item.{ItemAxe, ItemPickaxe, ItemStack}
+import net.minecraft.item.ItemStack
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
@@ -217,8 +218,8 @@ class ForgeEventHandler {
     val p = event.getEntityPlayer
     val item = p.getHeldItemMainhand.getItem
     event.getState.getMaterial match {
-      case Material.WOOD => if (item.isInstanceOf[ItemAxe]) event.setNewSpeed(original * (1.0F + p.getSkillStat(LOGGING).getCurrentLevel * 0.05F))
-      case Material.ROCK => if (item.isInstanceOf[ItemPickaxe]) event.setNewSpeed(original * (1.0F + p.getSkillStat(MINING).getCurrentLevel * 0.05F))
+      case Material.WOOD => if (Utilities.isAxe(item)) event.setNewSpeed(original * (1.0F + p.getSkillStat(LOGGING).getCurrentLevel * 0.05F))
+      case Material.ROCK => if (Utilities.isPickaxe(item)) event.setNewSpeed(original * (1.0F + p.getSkillStat(MINING).getCurrentLevel * 0.05F))
       case _ => event.setNewSpeed(original * (1.0F + p.getSkillStat(EXCAVATING).getCurrentLevel * 0.02F))
     }
   }
@@ -229,8 +230,8 @@ class ForgeEventHandler {
       case p: EntityPlayerMP =>
         val item = p.getHeldItemMainhand.getItem
         event.getState.getMaterial match {
-          case Material.WOOD => if (item.isInstanceOf[ItemAxe]) p.getSkillStat(LOGGING).addXp(p, 2)
-          case Material.ROCK => if (item.isInstanceOf[ItemPickaxe]) p.getSkillStat(MINING).addXp(p, 2)
+          case Material.WOOD => if (Utilities.isAxe(item)) p.getSkillStat(LOGGING).addXp(p, 2)
+          case Material.ROCK => if (Utilities.isPickaxe(item)) p.getSkillStat(MINING).addXp(p, 2)
           case _ => p.getSkillStat(EXCAVATING).addXp(p, 1)
         }
       case _ =>
