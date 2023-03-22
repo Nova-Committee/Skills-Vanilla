@@ -2,6 +2,7 @@ package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillsvanilla.implicits.Implicits.PlayerImplicit
+import committee.nova.skillsvanilla.item.api.IItemTickable
 import committee.nova.skillsvanilla.network.handler.NetworkHandler
 import committee.nova.skillsvanilla.network.message.TargetSyncMessage
 import committee.nova.skillsvanilla.registries.VanillaSkills
@@ -22,6 +23,16 @@ class FMLEventHandler {
     if (!player.isInstanceOf[EntityPlayerMP]) return
     val p = player.asInstanceOf[EntityPlayerMP]
     if (event.phase == Phase.START) return
+    // Tickable Items
+    val inv = p.inventory
+    val size = inv.getSizeInventory
+    for (i <- 0 until size) {
+      val stack = inv.getStackInSlot(i)
+      stack.getItem match {
+        case t: IItemTickable => t.tick(stack, p)
+        case _ =>
+      }
+    }
     // Will related exhaustion
     p.addExhaustion(-0.001F * p.getSkillStat(VanillaSkills.WILL).getCurrentLevel max -p.getFoodStats.foodExhaustionLevel)
     // Stealth check

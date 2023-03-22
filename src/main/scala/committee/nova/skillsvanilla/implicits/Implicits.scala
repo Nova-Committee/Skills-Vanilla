@@ -2,8 +2,12 @@ package committee.nova.skillsvanilla.implicits
 
 import committee.nova.skillsvanilla.util.Utilities
 import net.minecraft.entity.EntityLiving
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
+import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.network.play.server.SPacketSoundEffect
 import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.{SoundCategory, SoundEvent}
 
 import java.util.{List => JList}
 import scala.collection.JavaConverters.collectionAsScalaIterableConverter
@@ -31,5 +35,17 @@ object Implicits {
     def getTargeting(r: Double): Int = getMobsWithIn(r).asScala.count(m => player == m.getAttackTarget)
 
     def getMobsWithIn(r: Double): JList[EntityLiving] = player.world.getEntitiesWithinAABB(classOf[EntityLiving], new AxisAlignedBB(player.posX - r, player.posY - r, player.posZ - r, player.posX + r, player.posY + r, player.posZ + r))
+
+    def playPacketSound(sound: SoundEvent): Unit = player match {
+      case p: EntityPlayerMP => p.connection.sendPacket(new SPacketSoundEffect(sound, SoundCategory.PLAYERS, p.posX, p.posY, p.posZ, 1.0F, 1.0F))
+      case _ =>
+    }
+  }
+
+  implicit class ItemStackImplicit(val stack: ItemStack) {
+    def getOrCreateTag: NBTTagCompound = {
+      if (!stack.hasTagCompound) stack.setTagCompound(new NBTTagCompound)
+      stack.getTagCompound
+    }
   }
 }

@@ -1,0 +1,23 @@
+{
+  "parent": "skillsvanilla:item/rstd/rstd_off",
+  "overrides": [
+    {
+      "predicate": {
+        "skillsvanilla:status": 0.0
+      },
+      "model": "skillsvanilla:item/rstd/rstd_off"
+    },
+    {
+      "predicate": {
+        "skillsvanilla:status": 1.0
+      },
+      "model": "skillsvanilla:item/rstd/rstd_on"
+    },
+    {
+      "predicate": {
+        "skillsvanilla:status": 2.0
+      },
+      "model": "skillsvanilla:item/rstd/rstd_beep"
+    }
+  ]
+}

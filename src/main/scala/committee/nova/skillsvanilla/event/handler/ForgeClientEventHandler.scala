@@ -25,6 +25,7 @@ class ForgeClientEventHandler {
   @SubscribeEvent
   def onModelRegistry(event: ModelRegistryEvent): Unit = {
     ModelLoader.setCustomModelResourceLocation(ItemInit.trainingSword, 0, new ModelResourceLocation(ItemInit.trainingSword.getRegistryName, "inventory"))
+    ModelLoader.setCustomModelResourceLocation(ItemInit.rstd, 0, new ModelResourceLocation(ItemInit.rstd.getRegistryName, "inventory"))
   }
 
   @SubscribeEvent

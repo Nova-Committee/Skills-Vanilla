@@ -1,0 +1,6 @@
+{
+  "parent": "skillsvanilla:item/rstd/rstd_parent",
+  "textures": {
+    "1": "skillsvanilla:items/rstd_indicator_beep"
+  }
+}
