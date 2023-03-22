@@ -16,3 +16,6 @@ skill.skillsvanilla.anatomy=Anatomy
 skill.skillsvanilla.enchanting=Enchanting
 skill.skillsvanilla.stealth=Stealth
 overlay.skillsvanilla.perception.detected=Detected
+item.skillsvanilla.training_sword.name=Training Sword
+itemGroup.skillsvanilla.training=SkillsVanilla: Training
+tooltip.skillsvanilla.training_sword=A wooden sword that has been dulled and colored, sacrificing sharpness for better durability. Generally used for training.

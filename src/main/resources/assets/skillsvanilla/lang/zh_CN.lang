@@ -16,3 +16,6 @@ skill.skillsvanilla.anatomy=解剖学
 skill.skillsvanilla.enchanting=附魔
 skill.skillsvanilla.stealth=隐蔽
 overlay.skillsvanilla.perception.detected= 被发现
+item.skillsvanilla.training_sword.name=训练用剑
+itemGroup.skillsvanilla.training=技能：香草——训练
+tooltip.skillsvanilla.training_sword=一柄被磨钝后上色的木剑，牺牲锋利程度换来了更好的耐久。一般用作训练。

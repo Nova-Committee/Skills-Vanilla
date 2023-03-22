@@ -2,26 +2,29 @@ package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillful.storage.SkillfulStorage.{SkillRegisterEvent, SkillRelatedFoodRegisterEvent}
+import committee.nova.skillsvanilla.item.api.IItemForTraining
+import committee.nova.skillsvanilla.item.init.ItemInit
 import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods._
 import committee.nova.skillsvanilla.registries.VanillaSkills._
 import committee.nova.skillsvanilla.util.Utilities
 import net.minecraft.block.material.Material
-import net.minecraft.entity.item.EntityItem
+import net.minecraft.entity.item.{EntityArmorStand, EntityItem}
 import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
 import net.minecraft.entity.projectile.EntityArrow
 import net.minecraft.entity.projectile.EntityArrow.PickupStatus
 import net.minecraft.init.{Items, SoundEvents}
 import net.minecraft.inventory.ContainerEnchantment
-import net.minecraft.item.ItemStack
+import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent
 import net.minecraftforge.event.entity.living._
 import net.minecraftforge.event.entity.player.PlayerEvent.{BreakSpeed, Visibility}
-import net.minecraftforge.event.entity.player.{ItemFishedEvent, PlayerPickupXpEvent}
+import net.minecraftforge.event.entity.player.{AttackEntityEvent, ItemFishedEvent, PlayerPickupXpEvent}
 import net.minecraftforge.event.world.BlockEvent.BreakEvent
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 
@@ -51,6 +54,9 @@ class ForgeEventHandler {
     POISONOUS_POTATO, PUMPKIN_PIE, RAW_RABBIT, COOKED_RABBIT, RABBIT_STEW,
     RAW_MUTTON, COOKED_MUTTON, BEETROOT, BEETROOT_SOUP
   )
+
+  @SubscribeEvent
+  def onItemRegister(e: RegistryEvent.Register[Item]): Unit = ItemInit.init(e)
 
   @SubscribeEvent
   def onDamageModifier(event: LivingHurtEvent): Unit = {
@@ -166,6 +172,24 @@ class ForgeEventHandler {
     } else {
       attacker.getSkillStat(ANATOMY).addXp(attacker, rand.nextInt(2 + (victim.width * victim.height).toInt))
       attacker.getSkillStat(TACTICS).addXp(attacker, 5 + (victim.getMaxHealth / 20).toInt)
+    }
+  }
+
+  @SubscribeEvent
+  def onPlayerAttack(event: AttackEntityEvent): Unit = {
+    event.getEntityPlayer match {
+      case p: EntityPlayerMP => event.getTarget match {
+        case stand: EntityArmorStand =>
+          val stack = p.getHeldItemMainhand
+          if (!stack.getItem.isInstanceOf[IItemForTraining]) return
+          val rand = p.getRNG
+          p.getSkillStat(STRENGTH).addXp(p, rand.nextInt(2))
+          p.getSkillStat(TACTICS).addXp(p, rand.nextInt(2))
+          stand.punchCooldown = -1L
+          stack.damageItem(1, p)
+        case _ =>
+      }
+      case _ =>
     }
   }
 

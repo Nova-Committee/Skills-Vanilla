@@ -2,13 +2,16 @@ package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillsvanilla.SkillsVanilla
 import committee.nova.skillsvanilla.event.handler.ForgeClientEventHandler.texTarget
+import committee.nova.skillsvanilla.item.init.ItemInit
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.{Gui, ScaledResolution}
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.TextComponentTranslation
-import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
+import net.minecraftforge.client.event.{ModelRegistryEvent, RenderGameOverlayEvent}
+import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -19,6 +22,11 @@ object ForgeClientEventHandler {
 }
 
 class ForgeClientEventHandler {
+  @SubscribeEvent
+  def onModelRegistry(event: ModelRegistryEvent): Unit = {
+    ModelLoader.setCustomModelResourceLocation(ItemInit.trainingSword, 0, new ModelResourceLocation(ItemInit.trainingSword.getRegistryName, "inventory"))
+  }
+
   @SubscribeEvent
   def onRenderCrosshairs(event: RenderGameOverlayEvent.Post): Unit = {
     if (event.getType != ElementType.ALL) return
