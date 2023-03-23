@@ -33,5 +33,9 @@ object SkillsVanilla {
       Utilities.addPickaxe(c)
       Utilities.addAxe(c)
     })
+    Try(Class.forName("slimeknights.tconstruct.tools.tools.Pickaxe")).foreach(c => Utilities.addPickaxe(c))
+    Try(Class.forName("slimeknights.tconstruct.tools.tools.LumberAxe")).foreach(c => Utilities.addAxe(c))
+    Try(Class.forName("slimeknights.tconstruct.tools.tools.Mattock")).foreach(c => Utilities.addAxe(c))
+    Try(Class.forName("slimeknights.tconstruct.tools.tools.Hatchet")).foreach(c => Utilities.addAxe(c))
   }
 }
