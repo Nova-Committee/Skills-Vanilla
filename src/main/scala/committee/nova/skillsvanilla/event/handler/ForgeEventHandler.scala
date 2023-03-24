@@ -60,6 +60,7 @@ class ForgeEventHandler {
 
   @SubscribeEvent
   def onDamageModifier(event: LivingHurtEvent): Unit = {
+    if (event.getAmount < .0F) return
     var attacker: EntityPlayerMP = null
     var indirectDmg: EntityDamageSourceIndirect = null
     var isHurtByEntity = false
@@ -93,18 +94,20 @@ class ForgeEventHandler {
             val throwing = attacker.getSkillStat(THROWING)
             antiDodge *= (1F + throwing.getCurrentLevel * 0.001F)
             event.setAmount(event.getAmount + throwing.getCurrentLevel * 0.01F)
-            throwing.addXp(attacker, 1)
             event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-            strength.addXp(attacker, 2)
+            val sq = Math.sqrt(event.getAmount).toInt
+            throwing.addXp(attacker, sq)
+            strength.addXp(attacker, 2 * sq)
           case "arrow" =>
             val archery = attacker.getSkillStat(ARCHERY)
             if (archery.getCurrentLevel >= 20 && !victim.isInstanceOf[EntityPlayer])
               world.spawnEntity(new EntityItem(world, victim.posX, victim.posY + 1.0, victim.posZ, new ItemStack(Items.ARROW, 1)))
             antiDodge *= (1F + archery.getCurrentLevel * 0.05F)
             event.setAmount(event.getAmount * (1.0F + archery.getCurrentLevel * 0.02F))
-            archery.addXp(attacker, 1)
             event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-            strength.addXp(attacker, 2)
+            val sq = Math.sqrt(event.getAmount).toInt
+            archery.addXp(attacker, sq)
+            strength.addXp(attacker, 2 * sq)
           case _ =>
         }
       } else {
@@ -112,9 +115,10 @@ class ForgeEventHandler {
           val tactics = attacker.getSkillStat(TACTICS)
           antiDodge *= (1F + tactics.getCurrentLevel * 0.1F)
           event.setAmount(event.getAmount * (1.0F + tactics.getCurrentLevel * 0.02F))
-          tactics.addXp(attacker, 1)
           event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-          strength.addXp(attacker, 2)
+          val sq = Math.sqrt(event.getAmount).toInt
+          tactics.addXp(attacker, sq)
+          strength.addXp(attacker, 2 * sq)
         }
       }
     }
@@ -132,13 +136,14 @@ class ForgeEventHandler {
         val block = p.getSkillStat(BLOCK)
         val will = p.getSkillStat(WILL)
         event.setAmount(event.getAmount / (1.0F + (if (canBlock) block.getCurrentLevel else 1) * will.getCurrentLevel * strength.getCurrentLevel * 0.00005F))
+        val sq = Math.sqrt(event.getAmount).toInt
         if (isHurtByEntity) {
-          strength.addXp(p, 1)
-          if (canBlock) block.addXp(p, 2)
+          strength.addXp(p, sq)
+          if (canBlock) block.addXp(p, 2 * sq)
         }
-        will.addXp(p, 1 + fire)
         val constitution = p.getSkillStat(CONSTITUTION)
-        constitution.addXp(p, 1)
+        will.addXp(p, sq + fire)
+        constitution.addXp(p, sq)
       case _ =>
     }
   }
