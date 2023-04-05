@@ -15,7 +15,7 @@ import net.minecraft.entity.projectile.EntityArrow.PickupStatus
 import net.minecraft.init.{Items, SoundEvents}
 import net.minecraft.inventory.ContainerEnchantment
 import net.minecraft.item.{Item, ItemStack}
-import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.{AxisAlignedBB, MathHelper}
 import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
@@ -61,11 +61,12 @@ class ForgeEventHandler {
   @SubscribeEvent
   def onDamageModifier(event: LivingHurtEvent): Unit = {
     if (event.getAmount < .0F) return
+    val dmg = event.getSource
+    if (dmg.damageType == "outOfWorld") return
     var attacker: EntityPlayerMP = null
     var indirectDmg: EntityDamageSourceIndirect = null
     var isHurtByEntity = false
     var fire = 0
-    val dmg = event.getSource
     val world = event.getEntityLiving.world
     dmg match {
       case e: EntityDamageSource =>
@@ -95,7 +96,7 @@ class ForgeEventHandler {
             antiDodge *= (1F + throwing.getCurrentLevel * 0.001F)
             event.setAmount(event.getAmount + throwing.getCurrentLevel * 0.01F)
             event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-            val sq = Math.sqrt(event.getAmount).toInt
+            val sq = MathHelper.clamp(Math.sqrt(event.getAmount).toInt, 1, 500)
             throwing.addXp(attacker, sq)
             strength.addXp(attacker, 2 * sq)
           case "arrow" =>
@@ -105,7 +106,7 @@ class ForgeEventHandler {
             antiDodge *= (1F + archery.getCurrentLevel * 0.05F)
             event.setAmount(event.getAmount * (1.0F + archery.getCurrentLevel * 0.02F))
             event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-            val sq = Math.sqrt(event.getAmount).toInt
+            val sq = MathHelper.clamp(Math.sqrt(event.getAmount).toInt, 1, 500)
             archery.addXp(attacker, sq)
             strength.addXp(attacker, 2 * sq)
           case _ =>
@@ -116,7 +117,7 @@ class ForgeEventHandler {
           antiDodge *= (1F + tactics.getCurrentLevel * 0.1F)
           event.setAmount(event.getAmount * (1.0F + tactics.getCurrentLevel * 0.02F))
           event.setAmount(event.getAmount * (1.0F + strength.getCurrentLevel * 0.02F))
-          val sq = Math.sqrt(event.getAmount).toInt
+          val sq = MathHelper.clamp(Math.sqrt(event.getAmount).toInt, 1, 500)
           tactics.addXp(attacker, sq)
           strength.addXp(attacker, 2 * sq)
         }
@@ -136,7 +137,7 @@ class ForgeEventHandler {
         val block = p.getSkillStat(BLOCK)
         val will = p.getSkillStat(WILL)
         event.setAmount(event.getAmount / (1.0F + (if (canBlock) block.getCurrentLevel else 1) * will.getCurrentLevel * strength.getCurrentLevel * 0.00005F))
-        val sq = Math.sqrt(event.getAmount).toInt
+        val sq = MathHelper.clamp(Math.sqrt(event.getAmount).toInt, 1, 500)
         if (isHurtByEntity) {
           strength.addXp(p, sq)
           if (canBlock) block.addXp(p, 2 * sq)
