@@ -111,7 +111,7 @@ class ForgeEventHandler {
           case _ =>
         }
       } else {
-        if (!dmg.isMagicDamage) {
+        if (!dmg.isMagicDamage && !dmg.isProjectile) {
           val tactics = attacker.getSkillStat(TACTICS)
           antiDodge *= (1F + tactics.getCurrentLevel * 0.1F)
           event.setAmount(event.getAmount * (1.0F + tactics.getCurrentLevel * 0.02F))
