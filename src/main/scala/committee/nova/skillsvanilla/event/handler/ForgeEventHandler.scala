@@ -153,7 +153,8 @@ class ForgeEventHandler {
     val victim = event.getEntityLiving
     var attacker: EntityPlayerMP = null
     var indirectDmg: EntityDamageSourceIndirect = null
-    event.getSource match {
+    val src = event.getSource
+    src match {
       case e: EntityDamageSource =>
         e.getTrueSource match {
           case p: EntityPlayerMP => attacker = p
@@ -174,7 +175,7 @@ class ForgeEventHandler {
           attacker.getSkillStat(ARCHERY).addXp(attacker, 5 + (victim.getMaxHealth / 20).toInt)
         case _ =>
       }
-    } else {
+    } else if (!src.isMagicDamage && !src.isProjectile) {
       attacker.getSkillStat(ANATOMY).addXp(attacker, rand.nextInt(2 + (victim.width * victim.height).toInt))
       attacker.getSkillStat(TACTICS).addXp(attacker, 5 + (victim.getMaxHealth / 20).toInt)
     }
