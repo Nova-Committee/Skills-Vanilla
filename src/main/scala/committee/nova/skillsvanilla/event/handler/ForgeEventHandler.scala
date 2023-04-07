@@ -2,6 +2,8 @@ package committee.nova.skillsvanilla.event.handler
 
 import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillful.storage.SkillfulStorage.{SkillRegisterEvent, SkillRelatedFoodRegisterEvent}
+import committee.nova.skillsvanilla.config.CommonConfig
+import committee.nova.skillsvanilla.event.impl.DamageSourceBlackListEvent
 import committee.nova.skillsvanilla.item.api.IItemForTraining
 import committee.nova.skillsvanilla.item.init.ItemInit
 import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods._
@@ -56,6 +58,9 @@ class ForgeEventHandler {
   )
 
   @SubscribeEvent
+  def onDamageSourceBlackList(event: DamageSourceBlackListEvent): Unit = CommonConfig.getBlackList.foreach(s => event.addDamageSourceClassToBlackList(s))
+
+  @SubscribeEvent
   def onItemRegister(e: RegistryEvent.Register[Item]): Unit = ItemInit.init(e)
 
   @SubscribeEvent
@@ -63,6 +68,7 @@ class ForgeEventHandler {
     if (event.getAmount < .0F) return
     val dmg = event.getSource
     if (dmg.damageType == "outOfWorld") return
+    if (DamageSourceBlackListEvent.isInBlackList(dmg)) return
     var attacker: EntityPlayerMP = null
     var indirectDmg: EntityDamageSourceIndirect = null
     var isHurtByEntity = false
