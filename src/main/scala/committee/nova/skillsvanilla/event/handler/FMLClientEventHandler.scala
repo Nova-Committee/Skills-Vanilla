@@ -16,6 +16,9 @@ class FMLClientEventHandler {
   def onClientPlayerTick(event: PlayerTickEvent): Unit = {
     if (event.phase == Phase.START) return
     val player = event.player
-    if (player.isInsideOfMaterial(Material.WATER) && (player.motionX != .0 || player.motionY > .0 || player.motionZ != .0)) NetworkHandler.instance.sendToServer(new SwimmingSyncMessage)
+    if (!(player.isInsideOfMaterial(Material.WATER) && (player.motionX != .0 || player.motionY > .0 || player.motionZ != .0))) return
+    val msg = new SwimmingSyncMessage
+    msg.getTag.setString("uuid", player.getUniqueID.toString)
+    NetworkHandler.instance.sendToServer(msg)
   }
 }
