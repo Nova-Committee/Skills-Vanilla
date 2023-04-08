@@ -4,6 +4,7 @@ import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillful.storage.SkillfulStorage.{SkillRegisterEvent, SkillRelatedFoodRegisterEvent}
 import committee.nova.skillsvanilla.config.CommonConfig
 import committee.nova.skillsvanilla.event.impl.DamageSourceBlackListEvent
+import committee.nova.skillsvanilla.implicits.Implicits.AbstractHorseImplicit
 import committee.nova.skillsvanilla.item.api.IItemForTraining
 import committee.nova.skillsvanilla.item.init.ItemInit
 import committee.nova.skillsvanilla.registries.VanillaSkillRelatedFoods._
@@ -11,6 +12,7 @@ import committee.nova.skillsvanilla.registries.VanillaSkills._
 import committee.nova.skillsvanilla.util.Utilities
 import net.minecraft.block.material.Material
 import net.minecraft.entity.item.{EntityArmorStand, EntityItem}
+import net.minecraft.entity.passive.AbstractHorse
 import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
 import net.minecraft.entity.projectile.EntityArrow
 import net.minecraft.entity.projectile.EntityArrow.PickupStatus
@@ -22,11 +24,11 @@ import net.minecraft.util.{EntityDamageSource, EntityDamageSourceIndirect}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent
-import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent
 import net.minecraftforge.event.entity.living._
 import net.minecraftforge.event.entity.player.PlayerEvent.{BreakSpeed, Visibility}
 import net.minecraftforge.event.entity.player.{AttackEntityEvent, ItemFishedEvent, PlayerPickupXpEvent}
+import net.minecraftforge.event.entity.{EntityJoinWorldEvent, EntityMountEvent}
 import net.minecraftforge.event.world.BlockEvent.BreakEvent
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 
@@ -43,8 +45,8 @@ class ForgeEventHandler {
   def onSkillRegister(event: SkillRegisterEvent): Unit = event.addSkills(
     STRENGTH, CONSTITUTION, WILL, AGILITY, LUCK,
     PERCEPTION, TACTICS, BLOCK, ARCHERY, THROWING,
-    MINING, LOGGING, EXCAVATING, SWIMMING, ANATOMY,
-    ENCHANTING, STEALTH
+    MINING, LOGGING, EXCAVATING, SWIMMING, EQUESTRIANISM,
+    ANATOMY, ENCHANTING, STEALTH
   )
 
   @SubscribeEvent
@@ -223,7 +225,17 @@ class ForgeEventHandler {
       case p: EntityPlayer =>
         val agility = p.getSkillStat(AGILITY).getCurrentLevel
         val maxImmune = 3.0F + agility / 20.0F
-        event.setDamageMultiplier(if (event.getDistance < maxImmune) 0.0F else 1.0F - 0.009F * agility)
+        event.setDamageMultiplier(if (event.getDistance < maxImmune) .0F else 1.0F - 0.009F * agility)
+      case h: AbstractHorse => {
+        h.getControllingPassenger match {
+          case p: EntityPlayer => {
+            val equestrianism = p.getSkillStat(EQUESTRIANISM).getCurrentLevel
+            val maxImmune = 4.0F + equestrianism / 5.0F
+            event.setDamageMultiplier(if (event.getDistance < maxImmune) .0F else 1.0F - 0.009F * equestrianism)
+          }
+          case _ =>
+        }
+      }
       case _ =>
     }
   }
@@ -310,6 +322,28 @@ class ForgeEventHandler {
   def onFished(event: ItemFishedEvent): Unit = {
     event.getEntityPlayer match {
       case p: EntityPlayerMP => p.getSkillStat(PERCEPTION).addXp(p, 10)
+      case _ =>
+    }
+  }
+
+  @SubscribeEvent(priority = EventPriority.LOWEST)
+  def onMount(event: EntityMountEvent): Unit = {
+    event.getEntityBeingMounted match {
+      case h: AbstractHorse => h.updateAttrs(event.getEntityMounting, event.isMounting)
+      case _ =>
+    }
+  }
+
+  @SubscribeEvent
+  def onTame(event: AnimalTameEvent): Unit = {
+    event.getAnimal match {
+      case h: AbstractHorse =>
+        event.getTamer match {
+          case p: EntityPlayerMP =>
+            p.getSkillStat(EQUESTRIANISM).addXp(p, 500)
+            h.updateAttrs(p, shouldRenew = true)
+          case _ =>
+        }
       case _ =>
     }
   }

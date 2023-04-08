@@ -2,10 +2,12 @@ package committee.nova.skillsvanilla.registries
 
 import committee.nova.skillful.api.skill.{IApplyAttributeModifiers, IXPChangesAfterSleep}
 import committee.nova.skillful.impl.skill.instance.SkillInstance
-import committee.nova.skillful.impl.skill.{AttributeInfluencingSkill, Skill}
+import committee.nova.skillful.impl.skill.{AttributeInfluencingSkill, Skill, SkillBuilder}
 import committee.nova.skillsvanilla.SkillsVanilla
+import committee.nova.skillsvanilla.implicits.Implicits.AbstractHorseImplicit
 import committee.nova.skillsvanilla.modifiers.VanillaModifiers
 import net.minecraft.entity.ai.attributes.{AttributeModifier, IAttribute}
+import net.minecraft.entity.passive.AbstractHorse
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.entity.{EntityLivingBase, SharedMonsterAttributes}
 import net.minecraft.util.ResourceLocation
@@ -31,6 +33,12 @@ object VanillaSkills {
   final val EXCAVATING = new Skill(new ResourceLocation(SkillsVanilla.MODID, "excavating"), 100, BossInfo.Color.YELLOW, T200)
   final val SWIMMING = new AttributeInfluencingSkill(new ResourceLocation(SkillsVanilla.MODID, "swimming"), 100, BossInfo.Color.YELLOW, T200,
     EntityLivingBase.SWIM_SPEED, (_, s) => VanillaModifiers.getSwimmingSpeedBoostModifier(s.getCurrentLevel))
+  final val EQUESTRIANISM = SkillBuilder.create(new ResourceLocation(SkillsVanilla.MODID, "equestrianism"))
+    .setMaxLevel(100).setColor(BossInfo.Color.YELLOW).setLevelRequiredXP(T200)
+    .actOnLevelChange((p, _, _) => p.getRidingEntity match {
+      case h: AbstractHorse => h.updateAttrs(p, shouldRenew = true)
+      case _ =>
+    }).build
   final val ANATOMY = new Skill(new ResourceLocation(SkillsVanilla.MODID, "anatomy"), 100, BossInfo.Color.PURPLE, T200)
   final val ENCHANTING = new Skill(new ResourceLocation(SkillsVanilla.MODID, "enchanting"), 100, BossInfo.Color.PURPLE, T200)
   final val STEALTH = new Skill(new ResourceLocation(SkillsVanilla.MODID, "stealth"), 100, BossInfo.Color.PURPLE, T200)

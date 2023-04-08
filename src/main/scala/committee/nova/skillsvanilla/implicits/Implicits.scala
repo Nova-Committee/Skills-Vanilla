@@ -1,8 +1,12 @@
 package committee.nova.skillsvanilla.implicits
 
+import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
+import committee.nova.skillsvanilla.modifiers.VanillaModifiers
+import committee.nova.skillsvanilla.registries.VanillaSkills.EQUESTRIANISM
 import committee.nova.skillsvanilla.util.Utilities
-import net.minecraft.entity.EntityLiving
+import net.minecraft.entity.passive.AbstractHorse
 import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
+import net.minecraft.entity.{Entity, EntityLiving, SharedMonsterAttributes}
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.play.server.SPacketSoundEffect
@@ -39,6 +43,26 @@ object Implicits {
     def playPacketSound(sound: SoundEvent): Unit = player match {
       case p: EntityPlayerMP => p.connection.sendPacket(new SPacketSoundEffect(sound, SoundCategory.PLAYERS, p.posX, p.posY, p.posZ, 1.0F, 1.0F))
       case _ =>
+    }
+  }
+
+  implicit class AbstractHorseImplicit(val horse: AbstractHorse) {
+    def updateAttrs(entity: Entity, shouldRenew: Boolean): Unit = {
+      val speed = horse.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED)
+      speed.removeModifier(VanillaModifiers.EQUESTRIANISM_HORSE_SPEED_AMPLIFIER_UUID)
+      val jumpStrength = horse.getEntityAttribute(AbstractHorse.JUMP_STRENGTH)
+      jumpStrength.removeModifier(VanillaModifiers.EQUESTRIANISM_HORSE_JUMP_STRENGTH_AMPLIFIER_UUID)
+      val armorToughness = horse.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS)
+      armorToughness.removeModifier(VanillaModifiers.EQUESTRIANISM_HORSE_ARMOR_TOUGHNESS_AMPLIFIER_UUID)
+      if (!shouldRenew) return
+      entity match {
+        case p: EntityPlayerMP =>
+          val equestrianism = p.getSkillStat(EQUESTRIANISM).getCurrentLevel
+          speed.applyModifier(VanillaModifiers.getEquestrianismHorseSpeedAmplifier(equestrianism))
+          jumpStrength.applyModifier(VanillaModifiers.getEquestrianismHorseJumpStrengthAmplifier(equestrianism))
+          armorToughness.applyModifier(VanillaModifiers.getEquestrianismHorseArmorToughnessAmplifier(equestrianism))
+        case _ =>
+      }
     }
   }
 

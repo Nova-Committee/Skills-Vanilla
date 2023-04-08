@@ -4,9 +4,11 @@ import committee.nova.skillful.implicits.Implicits.EntityPlayerImplicit
 import committee.nova.skillsvanilla.implicits.Implicits.PlayerImplicit
 import committee.nova.skillsvanilla.item.api.IItemTickable
 import committee.nova.skillsvanilla.network.handler.NetworkHandler
+import committee.nova.skillsvanilla.network.message.SwimmingSyncMessage.rand
 import committee.nova.skillsvanilla.network.message.TargetSyncMessage
 import committee.nova.skillsvanilla.registries.VanillaSkills
-import committee.nova.skillsvanilla.registries.VanillaSkills.{PERCEPTION, SWIMMING}
+import committee.nova.skillsvanilla.registries.VanillaSkills.{EQUESTRIANISM, PERCEPTION, SWIMMING}
+import net.minecraft.entity.passive.AbstractHorse
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -51,6 +53,10 @@ class FMLEventHandler {
         msg.setTargeting(if (perception > 15) size else if (size > 0) -1 else 0)
         NetworkHandler.instance.sendTo(msg, p)
       }
+    }
+    p.getRidingEntity match {
+      case h: AbstractHorse => if (rand.nextInt(10) == 0) p.getSkillStat(EQUESTRIANISM).addXp(p, rand.nextInt(2) + 1)
+      case _ =>
     }
   }
 }
